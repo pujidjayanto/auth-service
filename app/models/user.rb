@@ -20,9 +20,15 @@ class User < ApplicationRecord
 
   validate :user_id_cannot_start_with_test
 
+  before_create :set_default_nickname
+
   private def user_id_cannot_start_with_test
     if user_id.present? && user_id&.start_with?("Test")
       errors.add(:user_id, "cannot start with 'Test'")
     end
+  end
+
+  private def set_default_nickname
+    self.nickname = user_id if nickname.blank?
   end
 end
