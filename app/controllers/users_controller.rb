@@ -39,7 +39,7 @@ class UsersController < ApplicationController
 
   # PATCH /users/:user_id
   def update
-    if @current_user&.user_id != params[:id]
+    if @current_user&.user_id != params[:user_id]
       render json: { message: "No user found" }, status: :not_found
       return
     end

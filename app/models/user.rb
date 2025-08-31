@@ -16,7 +16,8 @@ class User < ApplicationRecord
             format: {
               with: /\A[!-~]+\z/,
               message: "Incorrect character pattern"
-            }
+            },
+            on: :create
 
   validate :user_id_cannot_start_with_test
 
