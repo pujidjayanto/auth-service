@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_action :authenticate_user!, only: [:show, :update, :close]
+  before_action :require_basic_auth, only: [:show, :update, :close]
 
   # POST /signup
   def signup
@@ -39,24 +39,31 @@ class UsersController < ApplicationController
 
   # PATCH /users/:user_id
   def update
-    user = User.find_by(user_id: params[:user_id])
-    if user&.update(update_params)
+    if @current_user&.user_id != params[:id]
+      render json: { message: "No user found" }, status: :not_found
+      return
+    end
+
+    if @current_user&.update(update_params)
       render json: {
-        message: "User updated successfully",
+        message: "Account successfully updated",
         user: {
-          user_id: user.user_id,
-          nickname: user.nickname,
-          comment: user.comment
+          user_id: @current_user&.user_id,
+          nickname: @current_user&.nickname,
+          comment: @current_user&.comment
         }
-      }
+      }, status: :ok
     else
-      render json: { message: "Update failed" }, status: :unprocessable_entity
+      render json: {
+        message: "Account update failed",
+        cause: @current_user&.errors&.full_messages&.join(", ")
+      }, status: :unprocessable_entity
     end
   end
 
   # POST /close
   def close
-    if current_user&.destroy
+    if @current_user&.destroy
       render json: { message: "User deleted successfully" }
     else
       render json: { message: "Delete failed" }, status: :unprocessable_entity
